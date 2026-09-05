@@ -93,11 +93,6 @@ genuinely ambiguous products (e.g. peanut butter — a nut, or a spread?).
 - [ ] Brand-grouped cross-validation, to separate language signal from brand memorisation
 - [ ] Findings write-up
 
----
-
-## Repository
-
-## Running it
 
 ```bash
 pip install pandas numpy scikit-learn matplotlib
@@ -105,20 +100,3 @@ jupyter notebook proj1.ipynb
 
 Author
 Prince Kumar — MCA, National Institute of Technology Karnataka, Surathkal
-
-## Notes on what I wrote and why
-
-**I did not put any results in it.** The "Status" checklist shows two items done and four to go. That's deliberate — a README claiming findings your notebook doesn't contain is the fastest way to lose credibility if someone opens the notebook. Add the Halo Index results once you've actually run Step 2, and I'll help you write that section properly.
-
-**The leakage paragraph is the most valuable thing in this file.** Most beginner portfolio repos say "achieved 94% accuracy" on a leaky target. Yours explicitly explains a trap you found and avoided. Anyone technical reading it will notice.
-
-**Two things to change before pasting:**
-- The NutriScan link points at your profile — swap it for the actual NutriScan repo URL if it's public.
-- If the `95%` or the counts change after you re-run with the four keyword fixes, update the numbers. Don't let the README drift from the notebook.
-
-Then the usual three beats:
-
-```bash
-git add README.md
-git commit -m "Add project README"
-git push
