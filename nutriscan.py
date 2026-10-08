@@ -1,5 +1,8 @@
 import re
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
 
 CATEGORY_KEYWORDS = [
     ("pet_food", ["dog","cat food","puppy","kitten","drools","firstbark"]),
@@ -74,3 +77,20 @@ def build_halo(data, min_products=10):
     out = pd.DataFrame(results)
     out["difference"] = out["mean_with"] - out["mean_without"]
     return out.sort_values("difference")
+
+def train_model(data):
+    model = make_pipeline(
+        TfidfVectorizer(lowercase=True, ngram_range=(1,2), min_df=2, sublinear_tf=True),
+        LogisticRegression(max_iter=2000, class_weight="balanced"),
+    )
+    model.fit(data["name"], data["is_bad"])
+    return model
+
+def explain_prediction(model, text, top=6):
+    vec = model.named_steps["tfidfvectorizer"]
+    clf = model.named_steps["logisticregression"]
+    x = vec.transform([text])
+    words = vec.get_feature_names_out()
+    rows = [(words[i], float(x[0,i] * clf.coef_[0][i])) for i in x.nonzero()[1]]
+    rows.sort(key=lambda r: -abs(r[1]))
+    return rows[:top]

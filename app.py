@@ -1,6 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-from nutriscan import load_data, build_halo
+import pandas as pd
+from nutriscan import load_data, build_halo, train_model, explain_prediction
 
 st.set_page_config(page_title="Nutriscan - Health Halo", layout="wide")
 
@@ -15,7 +16,7 @@ def get_data():
 df, halo = get_data()
 
 st.title("Do health claims predict better food?")
-st.caption("4,338 Products scrapped from Flipkart and Jiomart . "
+st.caption("3,649 Products scrapped from Flipkart and Jiomart . "
            "claims compared within food category")
 
 c1, c2, c3 = st.columns(3)
@@ -65,3 +66,30 @@ st.pyplot(fig)
 st.caption("Panels share an x-axis. Categories with low baselines scores "
            "(biscuits ≈ 29) have more room to improve than high-baseline ones"
            "(staples ≈ 89), so bar length is not comparable across panels.")
+
+st.divider()
+st.subheader("Try the model")
+st.caption("Type any product name. The model has never seen it, it only reads the word")
+
+@st.cache_resource
+def get_model():
+    return train_model(df)
+
+model = get_model()
+
+name = st.text_input("Product name", value = "Britannia Gluten Free Butter Cookies", placeholder="e.g. Organic Ragi Millet Atta 1kg")
+
+if name.strip():
+    prob = model.predict_proba([name])[0][1]
+
+    left, right = st.columns([1,2])
+    left.metric("Chance this score poorly", f"{prob:.0%}")
+    rows = explain_prediction(model, name)
+    if rows:
+        exp = pd.DataFrame(rows, columns=["word", "push"])
+        exp["direction"] = exp["push"].apply(lambda v: "→ bad" if v > 0 else "→ good")
+        right.dataframe(exp.round(3), hide_index = True, use_container_width = True)
+    else:
+        right.info("None of these words appeared often enough in the training data.")
+st.caption("Each word's push = its TF-IDF weight in this name x the coefficient the model "
+           "learned for it. Positive pushes toward 'scores poorly'.")   
